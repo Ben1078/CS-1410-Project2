@@ -26,7 +26,50 @@ public class ViewRecipe extends JDialog {
 
     private boolean isEditing = false;
     private List<JTextField> ingredientsList = new ArrayList<>();
+    private Recipe recipe;
+    private MainPage mainPage;
 
+    public ViewRecipe(Frame parent, MainPage mainPage, Recipe recipe) {
+        super(parent, true);
+        setContentPane(contentPane);
+
+        this.mainPage = mainPage;
+        this.recipe = recipe;
+
+        int width = (int) (parent.getWidth() * 0.65);
+        int height = (int) (parent.getHeight() * 0.8);
+        setPreferredSize(new Dimension(width, height));
+
+        backButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (isEditing) {
+                    onCancel();
+                } else {
+                    onBack();
+                }
+            }
+        });
+        editButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (isEditing) {
+                    onConfirm();
+                } else {
+                    onEdit();
+                }
+            }
+        });
+        addIngredientButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                onAddIngredient();
+            }
+        });
+
+        displayRecipe(recipe);
+        pack();
+        setLocationRelativeTo(parent);
+    }
+
+    @Deprecated
     public ViewRecipe(Frame parent) {
         super(parent, true);
         setContentPane(contentPane);
@@ -163,6 +206,7 @@ public class ViewRecipe extends JDialog {
             editButton.setText("CONFIRM");
 
             recipeTitleLabel.setVisible(false);
+            recipeTitleTextField.setText(recipe.getName());
             recipeTitleTextField.setEditable(true);
             recipeTitleTextField.setVisible(true);
             instructionsTextArea.setEditable(true);
@@ -183,16 +227,37 @@ public class ViewRecipe extends JDialog {
 
     private void onEdit() {
         toggleEditing();
-        // todo pull ingredients from recipe and display them (editable)
+        for (String ingredient : recipe.getIngredients()) {
+            addIngredientTextField(ingredient);
+        }
     }
 
     private void onCancel() {
+        ingredientsPanel.removeAll();
+        ingredientsList.clear();
         toggleEditing();
     }
 
     public void onConfirm() {
         toggleEditing();
-        // todo update recipe
+
+        recipe.setName(recipeTitleTextField.getText());
+
+        ArrayList<String> ingredients = new ArrayList<>();
+
+        for (JTextField ingredientTextField : ingredientsList) {
+            ingredients.add(ingredientTextField.getText());
+        }
+
+        ingredientsPanel.removeAll();
+        ingredientsList.clear();
+
+        recipe.setIngredients(ingredients);
+        recipe.setInstructions(instructionsTextArea.getText());
+
+        displayRecipe(recipe);
+        mainPage.displayRecipes();
+
         // todo save recipe
     }
 }

@@ -1,6 +1,7 @@
 package gui;
 
 import recipeManager.Recipe;
+import recipeManager.RecipeManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,9 +23,13 @@ public class AddRecipeDialog extends JDialog {
     private JTextField labelTextField;
 
     private List<JTextField> ingredientsList = new ArrayList<>();
+    private RecipeManager recipeManager;
+    private MainPage mainPage;
 
-    public AddRecipeDialog(Frame parent) {
+    public AddRecipeDialog(Frame parent, MainPage mainPage, RecipeManager recipeManager) {
         super(parent, "Add New Recipe", true);
+        this.recipeManager = recipeManager;
+        this.mainPage = mainPage;
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
 
@@ -177,12 +182,11 @@ public class AddRecipeDialog extends JDialog {
         String recipeName = recipeNameTextField.getText();
         List<String> ingredients = getIngredients();
         String directions = directionsTextField.getText();
-        String imagePath = "";
+        String imagePath = ""; // todo get from input
 
         Recipe recipe = new Recipe(recipeName, (ArrayList<String>) ingredients, directions, imagePath);
-        // todo register recipe with RecipeManager
-
-        System.out.println(recipe);
+        recipeManager.addRecipe(recipe);
+        mainPage.displayRecipes();
 
         dispose();
     }

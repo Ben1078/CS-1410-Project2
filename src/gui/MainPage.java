@@ -1,6 +1,7 @@
 package gui;
 
 import recipeManager.Recipe;
+import recipeManager.RecipeManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,49 +16,64 @@ public class MainPage {
     private JPanel main;
     private Frame mainFrame;
 
-    public MainPage(Frame mainFrame) {
+    private RecipeManager recipeManager;
+
+    public MainPage(Frame mainFrame, RecipeManager recipeManager) {
         this.mainFrame = mainFrame;
-        test();
+        this.recipeManager = recipeManager;
+
+        display();
     }
 
-    // TODO DEBUG REMOVE
-    public void test() {
-        // recipes
-        for (int i = 0; i < 10; i++) {
+    public void displayRecipes() {
+        displayRecipes(recipeManager.getRecipes());
+    }
+
+    public void displayRecipes(List<Recipe> recipes) {
+        recipeDisplay.removeAll();
+
+        for (Recipe recipe : recipes) {
             JPanel recipeCard = new JPanel();
             recipeCard.setPreferredSize(new Dimension(300, 200));
             recipeCard.setBorder(BorderFactory.createLineBorder(Color.RED));
+            ViewRecipe viewRecipeDialog = new ViewRecipe(mainFrame, this, recipe);
             recipeCard.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    ViewRecipe viewRecipeDialog = new ViewRecipe(mainFrame);
                     viewRecipeDialog.setVisible(true);
                 }
             });
+
+            // todo add recipe title, image, etc. to card
+            recipeCard.add(new JLabel(recipe.getName()));
+
             recipeDisplay.add(recipeCard);
         }
 
-        // sidebar
-            // constraints
+        mainFrame.revalidate();
+    }
+
+    private void displaySideBar() {
+        // constraints
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.anchor = GridBagConstraints.NORTH;
 
-            // create recipe button
+        // create recipe button
         gridBagConstraints.gridx = 0; gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new Insets(15, 0, 0, 0);
         JButton addRecipeButton = new JButton("Add Recipe");
         addRecipeButton.addActionListener(e -> {
-            AddRecipeDialog dialog = new AddRecipeDialog(mainFrame);
+            AddRecipeDialog dialog = new AddRecipeDialog(mainFrame, this, recipeManager);
             dialog.setVisible(true);
         });
         sidebar.add(addRecipeButton, gridBagConstraints);
 
-            // space
+        // space
         gridBagConstraints.gridy = 1;
         gridBagConstraints.weighty = 0.5;
         sidebar.add(Box.createGlue(), gridBagConstraints);
 
-            // search bar and search button
+        // search bar and search button
         JPanel pairPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         pairPanel.add(new TextField());
         pairPanel.add(new JButton("Button 3"));
@@ -65,12 +81,12 @@ public class MainPage {
         gridBagConstraints.weighty = 0;
         sidebar.add(pairPanel, gridBagConstraints);
 
-            // space
+        // space
         gridBagConstraints.gridy = 3;
         gridBagConstraints.weighty = 1;
         sidebar.add(Box.createGlue(), gridBagConstraints);
 
-            // settings button
+        // settings button
         gridBagConstraints.gridy = 4;
         gridBagConstraints.weighty = 0;
         gridBagConstraints.insets = new Insets(0, 0, 15, 0);
@@ -78,21 +94,8 @@ public class MainPage {
     }
 
     public void display() {
-        // todo display search bar
-        // todo display search button
-        // todo display settings button
-        // todo display recipe cards
-    }
-
-    public void displayRecipes(List<Recipe> recipes) {
-        // todo sort alphabetically
-
-        for (Recipe recipe : recipes) {
-            String recipeName = recipe.getName();
-            String imagePath = recipe.getImagePath();
-
-            // todo create card for recipe
-        }
+        displaySideBar();
+        displayRecipes();
     }
 
     /**
@@ -100,7 +103,7 @@ public class MainPage {
      * @param recipes the list of recipes to search from (haystack).
      * @param searchStr the string to match recipe names to (needle).
      */
-    public List<Recipe> searchRecipe(List<Recipe> recipes, String searchStr) {
+    private List<Recipe> searchRecipe(List<Recipe> recipes, String searchStr) {
         List<Recipe> recipeList = new ArrayList<>();
 
         for (Recipe recipe : recipes) {
@@ -110,6 +113,13 @@ public class MainPage {
         }
 
         return recipeList;
+    }
+
+    private void onSearch() {
+        String searchQuery = ""; // todo get from input
+        List<Recipe> recipeList = searchRecipe(recipeManager.getRecipes(), searchQuery);
+
+        displayRecipes(recipeList);
     }
 
     public void openSettings() {

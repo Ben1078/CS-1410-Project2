@@ -1,8 +1,12 @@
 package gui;
 
+import recipeManager.Recipe;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddRecipeDialog extends JDialog {
     private JPanel contentPane;
@@ -16,6 +20,8 @@ public class AddRecipeDialog extends JDialog {
     private JTextArea directionsTextField;
     private JPanel ingredientsPanel;
     private JTextField labelTextField;
+
+    private List<JTextField> ingredientsList = new ArrayList<>();
 
     public AddRecipeDialog(Frame parent) {
         super(parent, "Add New Recipe", true);
@@ -72,9 +78,13 @@ public class AddRecipeDialog extends JDialog {
         gridBagConstraints.gridy = 1;
         addRecipeFormPanel.add(recipeNameTextField, gridBagConstraints);
 
-
             // recipe ingredients
         gridBagConstraints.gridy = 2;
+        addIngredientButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addIngredient();
+            }
+        });
         addRecipeFormPanel.add(addIngredientButton, gridBagConstraints);
 
         gridBagConstraints.gridy = 3;
@@ -89,18 +99,95 @@ public class AddRecipeDialog extends JDialog {
     }
 
     private void addIngredient() {
-        // todo create text field for ingredient
-        // todo create button to delete ingredient
-        // todo add to and update frame
+        JTextField ingredientTextField = new JTextField();
+        int index = ingredientsList.size();
+        ingredientTextField.setName("ingredientTextField" + index);
+        int width = (int) (this.getWidth() * 0.8);
+        int height = 25;
+        ingredientTextField.setPreferredSize(new Dimension(width, height));
+
+        ingredientsList.add(ingredientTextField);
+
+        JButton removeIngredientButton = new JButton("X");
+        removeIngredientButton.setName("removeIngredientButton" + index);
+        removeIngredientButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                removeIngredient(ingredientTextField, removeIngredientButton);
+            }
+        });
+
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 0; gridBagConstraints.gridy = index;
+        ingredientsPanel.add(ingredientTextField, gridBagConstraints);
+
+        gridBagConstraints.gridx = 1;
+        ingredientsPanel.add(removeIngredientButton, gridBagConstraints);
+
+        pack();
+    }
+
+    private void removeIngredient(JTextField ingredientTextField, JButton button) {
+        ingredientsPanel.remove(ingredientTextField);
+        ingredientsPanel.remove(button);
+        ingredientsList.remove(ingredientTextField);
+
+        updateIngredients();
+    }
+
+    private void updateIngredients() {
+        ingredientsPanel.removeAll();
+
+        int index = 0;
+
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 0; gridBagConstraints.gridy = 0;
+
+        for (JTextField ingredientTextField : ingredientsList) {
+            gridBagConstraints.gridx = 0; gridBagConstraints.gridy = index;
+            ingredientsPanel.add(ingredientTextField, gridBagConstraints);
+
+            JButton removeIngredientButton = new JButton("X");
+            removeIngredientButton.setName("removeIngredientButton" + index);
+            removeIngredientButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    removeIngredient(ingredientTextField, removeIngredientButton);
+                }
+            });
+
+            gridBagConstraints.gridx = 1;
+            ingredientsPanel.add(removeIngredientButton, gridBagConstraints);
+
+            index++;
+        }
+
+        pack();
+    }
+
+    private List<String> getIngredients() {
+        List<String> ingredients = new ArrayList<>();
+
+        for (JTextField ingredientTextField : ingredientsList) {
+            ingredients.add(ingredientTextField.getText());
+        }
+
+        return ingredients;
     }
 
     private void onOK() {
-        // todo add your code here
+        String recipeName = recipeNameTextField.getText();
+        List<String> ingredients = getIngredients();
+        String directions = directionsTextField.getText();
+        String imagePath = "";
+
+        Recipe recipe = new Recipe(recipeName, (ArrayList<String>) ingredients, directions, imagePath);
+        // todo register recipe with RecipeManager
+
+        System.out.println(recipe);
+
         dispose();
     }
 
     private void onCancel() {
-        // todo add your code here if necessary
         dispose();
     }
 }

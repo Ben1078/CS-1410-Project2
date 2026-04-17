@@ -1,5 +1,6 @@
 package gui;
 
+import recipeManager.FileManager;
 import recipeManager.Recipe;
 import recipeManager.RecipeManager;
 
@@ -21,8 +22,6 @@ public class MainPage {
     public MainPage(Frame mainFrame, RecipeManager recipeManager) {
         this.mainFrame = mainFrame;
         this.recipeManager = recipeManager;
-
-        display();
     }
 
     public void displayRecipes() {
@@ -36,7 +35,7 @@ public class MainPage {
             JPanel recipeCard = new JPanel();
             recipeCard.setPreferredSize(new Dimension(300, 200));
             recipeCard.setBorder(BorderFactory.createLineBorder(Color.RED));
-            ViewRecipe viewRecipeDialog = new ViewRecipe(mainFrame, this, recipe);
+            ViewRecipe viewRecipeDialog = new ViewRecipe(mainFrame, this, recipe, recipeManager);
             recipeCard.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -76,7 +75,7 @@ public class MainPage {
         // search bar and search button
         JPanel pairPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         pairPanel.add(new TextField());
-        pairPanel.add(new JButton("Button 3"));
+        pairPanel.add(new JButton("Search"));
         gridBagConstraints.gridy = 2;
         gridBagConstraints.weighty = 0;
         sidebar.add(pairPanel, gridBagConstraints);
@@ -90,7 +89,11 @@ public class MainPage {
         gridBagConstraints.gridy = 4;
         gridBagConstraints.weighty = 0;
         gridBagConstraints.insets = new Insets(0, 0, 15, 0);
-        sidebar.add(new JButton("Button 4"), gridBagConstraints);
+        JButton settingsButton = new JButton("Settings");
+        settingsButton.addActionListener(e -> {
+            openSettings();
+        });
+        sidebar.add(settingsButton, gridBagConstraints);
     }
 
     public void display() {
@@ -123,7 +126,8 @@ public class MainPage {
     }
 
     public void openSettings() {
-
+        JDialog settingsDialog = new Settings(this.mainFrame, this, recipeManager);
+        settingsDialog.setVisible(true);
     }
 
     public JPanel getContentPanel() {

@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class FileManager {
-    private static final String FILE_NAME = "./resources/recipes.dat";
+    private static String FILE_NAME = "./resources/recipes.dat";
 
     public static void saveRecipes(ArrayList<Recipe> recipes) {
         try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(Paths.get(FILE_NAME)))) {
@@ -37,5 +37,13 @@ public class FileManager {
         }
 
         return recipes;
+    }
+
+    public static void setFilePath(String filePath) {
+        FILE_NAME = filePath;
+    }
+
+    public static String getFilePath() {
+        return FILE_NAME;
     }
 }

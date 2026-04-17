@@ -6,15 +6,17 @@ public class RecipeManager {
     private ArrayList<Recipe> recipeList;
 
     public RecipeManager() {
-        this.recipeList = FileManager.loadRecipes();
+        loadRecipes();
     }
 
     public void addRecipe(Recipe recipe) {
         recipeList.add(recipe);
+        saveRecipes();
     }
 
     public void removeRecipe(Recipe recipe) {
         recipeList.remove(recipe);
+        saveRecipes();
     }
 
     public void editRecipe(Recipe recipe) {
@@ -24,9 +26,18 @@ public class RecipeManager {
             if (current.getName().equals(recipe.getName())) {
 
                 recipeList.set(i, recipe);
+                saveRecipes();
                 return;
             }
         }
+    }
+
+    public void loadRecipes() {
+        recipeList = FileManager.loadRecipes();
+    }
+
+    public void saveRecipes() {
+        FileManager.saveRecipes(recipeList);
     }
 
     public ArrayList<Recipe> getRecipes() {

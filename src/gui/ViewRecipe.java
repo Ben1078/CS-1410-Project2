@@ -1,6 +1,7 @@
 package gui;
 
 import recipeManager.Recipe;
+import recipeManager.RecipeManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,16 +24,21 @@ public class ViewRecipe extends JDialog {
     private JTextArea ingredientsTextArea;
     private JLabel insertTitleLabel;
     private JButton addIngredientButton;
+    private JButton deleteRecipeButton;
 
     private boolean isEditing = false;
     private List<JTextField> ingredientsList = new ArrayList<>();
     private Recipe recipe;
     private MainPage mainPage;
+    private Frame parent;
+    private RecipeManager recipeManager;
 
-    public ViewRecipe(Frame parent, MainPage mainPage, Recipe recipe) {
+    public ViewRecipe(Frame parent, MainPage mainPage, Recipe recipe, RecipeManager recipeManager) {
         super(parent, true);
         setContentPane(contentPane);
 
+        this.parent = parent;
+        this.recipeManager = recipeManager;
         this.mainPage = mainPage;
         this.recipe = recipe;
 
@@ -63,45 +69,13 @@ public class ViewRecipe extends JDialog {
                 onAddIngredient();
             }
         });
+        deleteRecipeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                onDeleteRecipe();
+            }
+        });
 
         displayRecipe(recipe);
-        pack();
-        setLocationRelativeTo(parent);
-    }
-
-    @Deprecated
-    public ViewRecipe(Frame parent) {
-        super(parent, true);
-        setContentPane(contentPane);
-
-        int width = (int) (parent.getWidth() * 0.65);
-        int height = (int) (parent.getHeight() * 0.8);
-        setPreferredSize(new Dimension(width, height));
-
-        backButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (isEditing) {
-                    onCancel();
-                } else {
-                    onBack();
-                }
-            }
-        });
-        editButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (isEditing) {
-                    onConfirm();
-                } else {
-                    onEdit();
-                }
-            }
-        });
-        addIngredientButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onAddIngredient();
-            }
-        });
-
         pack();
         setLocationRelativeTo(parent);
     }
@@ -236,6 +210,7 @@ public class ViewRecipe extends JDialog {
         ingredientsPanel.removeAll();
         ingredientsList.clear();
         toggleEditing();
+        displayRecipe(recipe);
     }
 
     public void onConfirm() {
@@ -255,9 +230,26 @@ public class ViewRecipe extends JDialog {
         recipe.setIngredients(ingredients);
         recipe.setInstructions(instructionsTextArea.getText());
 
+        recipeManager.editRecipe(recipe);
         displayRecipe(recipe);
         mainPage.displayRecipes();
+    }
 
-        // todo save recipe
+    public void onDeleteRecipe() {
+        int result = JOptionPane.showConfirmDialog(
+                parent,
+                "Are you sure you want to delete this recipe?\n(This cannot be undone!)",
+                "Delete Recipe",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (result == JOptionPane.NO_OPTION) {
+            return;
+        }
+
+        recipeManager.removeRecipe(recipe);
+        mainPage.displayRecipes();
+        dispose();
     }
 }

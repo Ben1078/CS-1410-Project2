@@ -2,23 +2,80 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="gui.MainPage">
   <grid id="27dc6" binding="main" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="20" y="20" width="500" height="400"/>
+      <xy x="20" y="20" width="593" height="400"/>
     </constraints>
-    <properties/>
+    <properties>
+      <doubleBuffered value="true"/>
+      <enabled value="true"/>
+    </properties>
     <border type="none"/>
     <children>
       <grid id="220e7" binding="sidebar" layout-manager="GridBagLayout">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="1.0" weighty="1.0"/>
+          <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="0.0"/>
         </constraints>
         <properties/>
         <border type="none"/>
-        <children/>
+        <children>
+          <grid id="66625" binding="searchPanel" layout-manager="FlowLayout" hgap="12" vgap="12" flow-align="0">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="9" fill="1" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.3" weighty="1.0"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="14caf" class="javax.swing.JTextField" binding="searchField" default-binding="true">
+                <constraints/>
+                <properties>
+                  <columns value="12"/>
+                </properties>
+              </component>
+              <component id="f0a92" class="javax.swing.JButton" binding="searchButton" default-binding="true">
+                <constraints/>
+                <properties>
+                  <text value="Search"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="5be15" binding="actionPanel" layout-manager="FlowLayout" hgap="12" vgap="12" flow-align="1">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.7" weighty="1.0"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="c81ca" class="javax.swing.JButton" binding="addRecipeButton" default-binding="true">
+                <constraints/>
+                <properties>
+                  <text value="Add Recipe"/>
+                </properties>
+              </component>
+              <component id="da643" class="javax.swing.JButton" binding="settingsButton" default-binding="true">
+                <constraints/>
+                <properties>
+                  <text value="Settings"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="298e" binding="rightSidebarSpacer" layout-manager="FlowLayout" hgap="12" vgap="12" flow-align="2">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="4" fill="1" indent="0" use-parent-layout="false"/>
+              <gridbag weightx="0.3" weighty="1.0"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children/>
+          </grid>
+        </children>
       </grid>
-      <grid id="24ec5" binding="recipeDisplay" layout-manager="FlowLayout" hgap="50" vgap="50" flow-align="0">
+      <grid id="24ec5" binding="recipeDisplay" layout-manager="FlowLayout" hgap="24" vgap="12" flow-align="0">
         <constraints>
-          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <gridbag weightx="3.0" weighty="3.0"/>
         </constraints>
         <properties/>

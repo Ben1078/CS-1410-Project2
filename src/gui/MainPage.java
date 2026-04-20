@@ -5,17 +5,37 @@ import recipeManager.Recipe;
 import recipeManager.RecipeManager;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainPage {
+    private static final Color SIDEBAR_BACKGROUND = new Color(34, 45, 62);
+    private static final Color SEARCH_PANEL_BACKGROUND = new Color(44, 58, 80);
+    private static final Color BUTTON_PRIMARY = new Color(255, 196, 61);
+    private static final Color BUTTON_PRIMARY_HOVER = new Color(242, 175, 33);
+    private static final Color BUTTON_TEXT = new Color(34, 45, 62);
+    private static final Color SEARCH_FIELD_BACKGROUND = new Color(245, 247, 250);
+    private static final Color SEARCH_FIELD_TEXT = new Color(34, 45, 62);
+
     private JPanel sidebar;
     private JPanel recipeDisplay;
     private JPanel main;
+    private JPanel searchPanel;
+    private JPanel actionPanel;
+    private JPanel rightSidebarSpacer;
+    private JTextField searchField;
+    private JButton searchButton;
+    private JButton addRecipeButton;
+    private JButton settingsButton;
     private Frame mainFrame;
+    private boolean sidebarActionsBound;
+    private boolean sidebarLayoutBound;
 
     private RecipeManager recipeManager;
 
@@ -30,6 +50,7 @@ public class MainPage {
 
     public void displayRecipes(List<Recipe> recipes) {
         recipeDisplay.removeAll();
+        recipeDisplay.setLayout(new FlowLayout(FlowLayout.LEFT, 24, 12));
 
         for (Recipe recipe : recipes) {
             JPanel recipeCard = new JPanel();
@@ -53,47 +74,107 @@ public class MainPage {
     }
 
     private void displaySideBar() {
-        // constraints
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.anchor = GridBagConstraints.NORTH;
+        configureSidebarLayout();
+        bindSidebarActions();
+        applySidebarTheme();
+        sidebar.revalidate();
+        sidebar.repaint();
+    }
 
-        // create recipe button
-        gridBagConstraints.gridx = 0; gridBagConstraints.gridy = 0;
-        gridBagConstraints.insets = new Insets(15, 0, 0, 0);
-        JButton addRecipeButton = new JButton("Add Recipe");
+    private void bindSidebarActions() {
+        if (sidebarActionsBound) {
+            return;
+        }
+
+        searchButton.addActionListener(e -> onSearch());
+        searchField.addActionListener(e -> onSearch());
         addRecipeButton.addActionListener(e -> {
             AddRecipeDialog dialog = new AddRecipeDialog(mainFrame, this, recipeManager);
             dialog.setVisible(true);
         });
-        sidebar.add(addRecipeButton, gridBagConstraints);
+        settingsButton.addActionListener(e -> openSettings());
+        sidebarActionsBound = true;
+    }
 
-        // space
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.weighty = 0.5;
-        sidebar.add(Box.createGlue(), gridBagConstraints);
+    private void applySidebarTheme() {
+        Font buttonFont = new Font("SansSerif", Font.BOLD, 16);
+        Dimension buttonSize = new Dimension(150, 42);
+        Border sidebarPadding = BorderFactory.createEmptyBorder(10, 16, 10, 16);
 
-        // search bar and search button
-        JPanel pairPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-        pairPanel.add(new TextField());
-        pairPanel.add(new JButton("Search"));
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.weighty = 0;
-        sidebar.add(pairPanel, gridBagConstraints);
+        sidebar.setBackground(SIDEBAR_BACKGROUND);
+        sidebar.setBorder(sidebarPadding);
+        searchPanel.setBackground(SIDEBAR_BACKGROUND);
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        actionPanel.setBackground(SIDEBAR_BACKGROUND);
+        actionPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        rightSidebarSpacer.setBackground(SIDEBAR_BACKGROUND);
+        rightSidebarSpacer.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-        // space
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.weighty = 1;
-        sidebar.add(Box.createGlue(), gridBagConstraints);
+        searchField.setPreferredSize(new Dimension(180, 38));
+        searchField.setBackground(SEARCH_FIELD_BACKGROUND);
+        searchField.setForeground(SEARCH_FIELD_TEXT);
+        searchField.setCaretColor(SEARCH_FIELD_TEXT);
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(SEARCH_PANEL_BACKGROUND.darker(), 1),
+                BorderFactory.createEmptyBorder(6, 10, 6, 10)
+        ));
 
-        // settings button
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.weighty = 0;
-        gridBagConstraints.insets = new Insets(0, 0, 15, 0);
-        JButton settingsButton = new JButton("Settings");
-        settingsButton.addActionListener(e -> {
-            openSettings();
+        styleButton(searchButton, buttonFont, buttonSize, BUTTON_PRIMARY_HOVER);
+        styleButton(addRecipeButton, buttonFont, buttonSize, BUTTON_PRIMARY);
+        styleButton(settingsButton, buttonFont, buttonSize, BUTTON_PRIMARY);
+    }
+
+    private void styleButton(JButton button, Font font, Dimension size, Color background) {
+        button.setFont(font);
+        button.setPreferredSize(size);
+        button.setBackground(background);
+        button.setForeground(BUTTON_TEXT);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        button.setOpaque(true);
+    }
+
+    private void configureSidebarLayout() {
+        sidebar.setLayout(new BorderLayout());
+        installSidebarResizeHandler();
+        updateSidebarPreferredSizes();
+
+        sidebar.remove(searchPanel);
+        sidebar.remove(actionPanel);
+        sidebar.remove(rightSidebarSpacer);
+        sidebar.add(searchPanel, BorderLayout.WEST);
+        sidebar.add(actionPanel, BorderLayout.CENTER);
+        sidebar.add(rightSidebarSpacer, BorderLayout.EAST);
+    }
+
+    private void installSidebarResizeHandler() {
+        if (sidebarLayoutBound) {
+            return;
+        }
+
+        sidebar.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                updateSidebarPreferredSizes();
+                sidebar.revalidate();
+            }
         });
-        sidebar.add(settingsButton, gridBagConstraints);
+        sidebarLayoutBound = true;
+    }
+
+    private void updateSidebarPreferredSizes() {
+        int sidebarWidth = Math.max(sidebar.getWidth(), main.getWidth());
+        int searchWidth = Math.max(220, (int) Math.round(sidebarWidth * 0.30));
+        int rightSpacerWidth = Math.max(180, (int) Math.round(sidebarWidth * 0.30));
+        int actionWidth = Math.max(260, sidebarWidth - searchWidth - rightSpacerWidth);
+        int sidebarHeight = 62;
+
+        searchPanel.setPreferredSize(new Dimension(searchWidth, sidebarHeight));
+        searchPanel.setMinimumSize(new Dimension(searchWidth, sidebarHeight));
+        actionPanel.setPreferredSize(new Dimension(actionWidth, sidebarHeight));
+        actionPanel.setMinimumSize(new Dimension(actionWidth, sidebarHeight));
+        rightSidebarSpacer.setPreferredSize(new Dimension(rightSpacerWidth, sidebarHeight));
+        rightSidebarSpacer.setMinimumSize(new Dimension(rightSpacerWidth, sidebarHeight));
     }
 
     public void display() {
@@ -119,7 +200,7 @@ public class MainPage {
     }
 
     private void onSearch() {
-        String searchQuery = ""; // todo get from input
+        String searchQuery = searchField.getText();
         List<Recipe> recipeList = searchRecipe(recipeManager.getRecipes(), searchQuery);
 
         displayRecipes(recipeList);

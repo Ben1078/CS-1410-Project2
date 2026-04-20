@@ -1,5 +1,8 @@
 package recipeManager;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class RecipeManager {
@@ -15,6 +18,11 @@ public class RecipeManager {
     }
 
     public void removeRecipe(Recipe recipe) {
+        try {
+            Files.deleteIfExists(Path.of(recipe.getImagePath()));
+        } catch (IOException e) {
+            System.err.println("Error deleting recipe image: " + e.getMessage());
+        }
         recipeList.remove(recipe);
         saveRecipes();
     }
@@ -43,4 +51,6 @@ public class RecipeManager {
     public ArrayList<Recipe> getRecipes() {
         return recipeList;
     }
+
+
 }

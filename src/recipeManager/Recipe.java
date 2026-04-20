@@ -23,7 +23,7 @@ public class Recipe implements Serializable {
     public Recipe(String name, ArrayList<String> ingredients, String instructions, String imagePath) {
         this.name = name;
         this.ingredients = ingredients;
-        this. instructions = instructions;
+        this.instructions = instructions;
         this.imagePath = imagePath;
     }
 

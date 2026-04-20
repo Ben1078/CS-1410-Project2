@@ -6,10 +6,16 @@ import recipeManager.RecipeManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AddRecipeDialog extends JDialog {
+    private static final Path IMAGE_DIRECTORY = Path.of("resources", "images");
+
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -21,10 +27,13 @@ public class AddRecipeDialog extends JDialog {
     private JTextArea directionsTextField;
     private JPanel ingredientsPanel;
     private JTextField labelTextField;
+    private JButton setImageButton;
+    private JLabel selectedImageLabel;
 
     private List<JTextField> ingredientsList = new ArrayList<>();
     private RecipeManager recipeManager;
     private MainPage mainPage;
+    private Path selectedImageSource;
 
     public AddRecipeDialog(Frame parent, MainPage mainPage, RecipeManager recipeManager) {
         super(parent, "Add New Recipe", true);
@@ -46,6 +55,11 @@ public class AddRecipeDialog extends JDialog {
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
+            }
+        });
+        setImageButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                onSetImage();
             }
         });
 
@@ -182,7 +196,7 @@ public class AddRecipeDialog extends JDialog {
         String recipeName = recipeNameTextField.getText();
         List<String> ingredients = getIngredients();
         String directions = directionsTextField.getText();
-        String imagePath = ""; // todo get from input
+        String imagePath = copySelectedImage(recipeName);
 
         Recipe recipe = new Recipe(recipeName, (ArrayList<String>) ingredients, directions, imagePath);
         recipeManager.addRecipe(recipe);
@@ -193,5 +207,55 @@ public class AddRecipeDialog extends JDialog {
 
     private void onCancel() {
         dispose();
+    }
+
+    private void onSetImage() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Select Recipe Image");
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                "Image Files", "jpg", "jpeg", "png", "gif", "webp"
+        ));
+
+        int result = fileChooser.showOpenDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        selectedImageSource = fileChooser.getSelectedFile().toPath();
+        selectedImageLabel.setText(selectedImageSource.getFileName().toString());
+    }
+
+    private String copySelectedImage(String recipeName) {
+        if (selectedImageSource == null) {
+            return "";
+        }
+
+        try {
+            Files.createDirectories(IMAGE_DIRECTORY);
+
+            String originalName = selectedImageSource.getFileName().toString();
+            String extension = "";
+            int dotIndex = originalName.lastIndexOf('.');
+            if (dotIndex >= 0) {
+                extension = originalName.substring(dotIndex);
+            }
+
+            String safeRecipeName = recipeName == null || recipeName.isBlank()
+                    ? "recipe"
+                    : recipeName.trim().toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+
+            String targetName = safeRecipeName + "-" + System.currentTimeMillis() + extension;
+            Path targetPath = IMAGE_DIRECTORY.resolve(targetName);
+            Files.copy(selectedImageSource, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            return targetPath.toString();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Could not save the selected image.",
+                    "Image Save Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return "";
+        }
     }
 }

@@ -31,6 +31,7 @@ public class AddRecipeDialog extends JDialog {
     private JLabel selectedImageLabel;
 
     private List<JTextField> ingredientsList = new ArrayList<>();
+    private List<JPanel> ingredientRows = new ArrayList<>();
     private RecipeManager recipeManager;
     private MainPage mainPage;
     private Path selectedImageSource;
@@ -84,102 +85,99 @@ public class AddRecipeDialog extends JDialog {
     }
 
     private void setup() {
-        addRecipeFormPanel.setLayout(new GridBagLayout());
+        ingredientsPanel.setLayout(new BoxLayout(ingredientsPanel, BoxLayout.Y_AXIS));
+        directionsTextField.setLineWrap(true);
+        directionsTextField.setWrapStyleWord(true);
 
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-
-            // recipe name
-        gridBagConstraints.gridx = 0; gridBagConstraints.gridy = 0;
-        gridBagConstraints.weightx = 0.25;
-        addRecipeFormPanel.add(recipeNameLabel, gridBagConstraints);
-
-        gridBagConstraints.gridy = 1;
-        addRecipeFormPanel.add(recipeNameTextField, gridBagConstraints);
-
-            // recipe ingredients
-        gridBagConstraints.gridy = 2;
         addIngredientButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 addIngredient();
             }
         });
-        addRecipeFormPanel.add(addIngredientButton, gridBagConstraints);
-
-        gridBagConstraints.gridy = 3;
-        addRecipeFormPanel.add(ingredientsPanel, gridBagConstraints);
-
-            // recipe directions
-        gridBagConstraints.gridy = 4;
-        addRecipeFormPanel.add(directionsLabel, gridBagConstraints);
-
-        gridBagConstraints.gridy = 5;
-        addRecipeFormPanel.add(directionsTextField, gridBagConstraints);
     }
 
     private void addIngredient() {
         JTextField ingredientTextField = new JTextField();
         int index = ingredientsList.size();
         ingredientTextField.setName("ingredientTextField" + index);
-        int width = (int) (this.getWidth() * 0.8);
-        int height = 25;
-        ingredientTextField.setPreferredSize(new Dimension(width, height));
+        ingredientTextField.setColumns(28);
+        ingredientTextField.setMinimumSize(new Dimension(320, 36));
+        ingredientTextField.setPreferredSize(new Dimension(420, 36));
+        ingredientTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
         ingredientsList.add(ingredientTextField);
 
         JButton removeIngredientButton = new JButton("X");
         removeIngredientButton.setName("removeIngredientButton" + index);
+        removeIngredientButton.setPreferredSize(new Dimension(48, 36));
         removeIngredientButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 removeIngredient(ingredientTextField, removeIngredientButton);
             }
         });
 
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 0; gridBagConstraints.gridy = index;
-        ingredientsPanel.add(ingredientTextField, gridBagConstraints);
+        JPanel ingredientRow = new JPanel(new BorderLayout(8, 0));
+        ingredientRow.setOpaque(false);
+        ingredientRow.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        ingredientRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        ingredientRow.setMinimumSize(new Dimension(380, 36));
+        ingredientRow.setPreferredSize(new Dimension(468, 36));
+        ingredientRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        ingredientRow.add(ingredientTextField, BorderLayout.CENTER);
+        ingredientRow.add(removeIngredientButton, BorderLayout.EAST);
 
-        gridBagConstraints.gridx = 1;
-        ingredientsPanel.add(removeIngredientButton, gridBagConstraints);
+        ingredientRows.add(ingredientRow);
+        ingredientsPanel.add(ingredientRow);
 
-        pack();
+        refreshIngredientLayout();
     }
 
     private void removeIngredient(JTextField ingredientTextField, JButton button) {
-        ingredientsPanel.remove(ingredientTextField);
-        ingredientsPanel.remove(button);
-        ingredientsList.remove(ingredientTextField);
+        int index = ingredientsList.indexOf(ingredientTextField);
+        if (index >= 0) {
+            ingredientsList.remove(index);
+            JPanel ingredientRow = ingredientRows.remove(index);
+            ingredientsPanel.remove(ingredientRow);
+        }
 
         updateIngredients();
     }
 
     private void updateIngredients() {
         ingredientsPanel.removeAll();
-
-        int index = 0;
-
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 0; gridBagConstraints.gridy = 0;
+        ingredientRows.clear();
 
         for (JTextField ingredientTextField : ingredientsList) {
-            gridBagConstraints.gridx = 0; gridBagConstraints.gridy = index;
-            ingredientsPanel.add(ingredientTextField, gridBagConstraints);
-
             JButton removeIngredientButton = new JButton("X");
-            removeIngredientButton.setName("removeIngredientButton" + index);
+            removeIngredientButton.setPreferredSize(new Dimension(48, 36));
             removeIngredientButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     removeIngredient(ingredientTextField, removeIngredientButton);
                 }
             });
 
-            gridBagConstraints.gridx = 1;
-            ingredientsPanel.add(removeIngredientButton, gridBagConstraints);
+            JPanel ingredientRow = new JPanel(new BorderLayout(8, 0));
+            ingredientRow.setOpaque(false);
+            ingredientRow.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+            ingredientRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+            ingredientRow.setMinimumSize(new Dimension(380, 36));
+            ingredientRow.setPreferredSize(new Dimension(468, 36));
+            ingredientRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+            ingredientRow.add(ingredientTextField, BorderLayout.CENTER);
+            ingredientRow.add(removeIngredientButton, BorderLayout.EAST);
 
-            index++;
+            ingredientRows.add(ingredientRow);
+            ingredientsPanel.add(ingredientRow);
         }
 
-        pack();
+        refreshIngredientLayout();
+    }
+
+    private void refreshIngredientLayout() {
+        ingredientsPanel.revalidate();
+        ingredientsPanel.repaint();
+        contentPane.revalidate();
+        contentPane.repaint();
     }
 
     private List<String> getIngredients() {

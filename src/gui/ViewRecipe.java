@@ -108,10 +108,9 @@ public class ViewRecipe extends JDialog {
 
     private void addIngredientTextField(String ingredient) {
         JTextField ingredientTextField = new JTextField(ingredient);
-        int index = ingredientsList.size();
-        int width = Math.max(320, ingredientsPanel.getWidth() - 80);
-        int height = 38;
-        ingredientTextField.setPreferredSize(new Dimension(width, height));
+        ingredientTextField.setMinimumSize(new Dimension(320, 38));
+        ingredientTextField.setPreferredSize(new Dimension(420, 38));
+        ingredientTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         ingredientTextField.setFont(new Font("SansSerif", Font.PLAIN, 15));
         ingredientTextField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(208, 214, 224), 1),
@@ -119,25 +118,7 @@ public class ViewRecipe extends JDialog {
         ));
 
         ingredientsList.add(ingredientTextField);
-
-        JButton removeIngredientButton = new JButton("X");
-        removeIngredientButton.setName("removeIngredientButton" + index);
-        styleActionButton(removeIngredientButton, DANGER, Color.WHITE);
-        removeIngredientButton.setPreferredSize(new Dimension(48, 36));
-        removeIngredientButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onRemoveIngredient(ingredientTextField, removeIngredientButton);
-            }
-        });
-
-        GridBagConstraints gridBagConstraints = new GridBagConstraints();
-        gridBagConstraints.gridx = 0; gridBagConstraints.gridy = index;
-        ingredientsPanel.add(ingredientTextField, gridBagConstraints);
-
-        gridBagConstraints.gridx = 1;
-        ingredientsPanel.add(removeIngredientButton, gridBagConstraints);
-
-        refreshDialogLayout();
+        updateIngredients();
     }
 
     public void onAddIngredient() {
@@ -162,6 +143,7 @@ public class ViewRecipe extends JDialog {
         gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new Insets(0, 0, 10, 10);
+        gridBagConstraints.weightx = 1.0;
 
         for (JTextField ingredientTextField : ingredientsList) {
             gridBagConstraints.gridx = 0; gridBagConstraints.gridy = index;
@@ -178,6 +160,7 @@ public class ViewRecipe extends JDialog {
             });
 
             gridBagConstraints.gridx = 1;
+            gridBagConstraints.weightx = 0.0;
             ingredientsPanel.add(removeIngredientButton, gridBagConstraints);
 
             index++;

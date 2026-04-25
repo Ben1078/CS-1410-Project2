@@ -1,6 +1,5 @@
 package gui;
 
-import recipeManager.FileManager;
 import recipeManager.Recipe;
 import recipeManager.RecipeManager;
 
@@ -11,6 +10,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +22,10 @@ public class MainPage {
     private static final Color BUTTON_TEXT = new Color(34, 45, 62);
     private static final Color SEARCH_FIELD_BACKGROUND = new Color(245, 247, 250);
     private static final Color SEARCH_FIELD_TEXT = new Color(34, 45, 62);
+    private static final Color RECIPE_CARD_BACKGROUND = Color.WHITE;
+    private static final Color RECIPE_CARD_BORDER = new Color(222, 228, 237);
+    private static final Color RECIPE_CARD_TITLE = new Color(34, 45, 62);
+    private static final Color RECIPE_CARD_IMAGE_FALLBACK = new Color(232, 237, 244);
 
     private JPanel sidebar;
     private JPanel recipeDisplay;
@@ -45,17 +49,28 @@ public class MainPage {
     }
 
     public void displayRecipes() {
-        displayRecipes(recipeManager.getRecipes());
+        displayRecipes(getFilteredRecipes());
     }
 
     public void displayRecipes(List<Recipe> recipes) {
         recipeDisplay.removeAll();
         recipeDisplay.setLayout(new FlowLayout(FlowLayout.LEFT, 24, 12));
 
+        if (recipes.isEmpty()) {
+            JLabel emptyStateLabel = new JLabel("No recipes match your search.");
+            emptyStateLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+            emptyStateLabel.setForeground(RECIPE_CARD_TITLE);
+            recipeDisplay.add(emptyStateLabel);
+        }
+
         for (Recipe recipe : recipes) {
-            JPanel recipeCard = new JPanel();
+            JPanel recipeCard = new JPanel(new BorderLayout(0, 12));
             recipeCard.setPreferredSize(new Dimension(300, 200));
-            recipeCard.setBorder(BorderFactory.createLineBorder(Color.RED));
+            recipeCard.setBackground(RECIPE_CARD_BACKGROUND);
+            recipeCard.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(RECIPE_CARD_BORDER, 1),
+                    BorderFactory.createEmptyBorder(12, 12, 12, 12)
+            ));
             ViewRecipe viewRecipeDialog = new ViewRecipe(mainFrame, this, recipe, recipeManager);
             recipeCard.addMouseListener(new MouseAdapter() {
                 @Override
@@ -64,13 +79,59 @@ public class MainPage {
                 }
             });
 
-            // todo add recipe title, image, etc. to card
-            recipeCard.add(new JLabel(recipe.getName()));
+            JLabel imageLabel = createRecipeCardImage(recipe);
+            imageLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    viewRecipeDialog.setVisible(true);
+                }
+            });
+
+            JLabel titleLabel = new JLabel(recipe.getName());
+            titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+            titleLabel.setForeground(RECIPE_CARD_TITLE);
+            titleLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    viewRecipeDialog.setVisible(true);
+                }
+            });
+
+            recipeCard.add(imageLabel, BorderLayout.CENTER);
+            recipeCard.add(titleLabel, BorderLayout.SOUTH);
 
             recipeDisplay.add(recipeCard);
         }
 
+        recipeDisplay.revalidate();
+        recipeDisplay.repaint();
         mainFrame.revalidate();
+        mainFrame.repaint();
+    }
+
+    private JLabel createRecipeCardImage(Recipe recipe) {
+        JLabel imageLabel = new JLabel("", SwingConstants.CENTER);
+        imageLabel.setOpaque(true);
+        imageLabel.setBackground(RECIPE_CARD_IMAGE_FALLBACK);
+        imageLabel.setPreferredSize(new Dimension(276, 136));
+        imageLabel.setBorder(BorderFactory.createLineBorder(RECIPE_CARD_BORDER, 1));
+
+        String imagePath = recipe.getImagePath();
+        if (imagePath == null || imagePath.isBlank()) {
+            imageLabel.setText("No Image");
+            return imageLabel;
+        }
+
+        File imageFile = new File(imagePath);
+        if (!imageFile.exists()) {
+            imageLabel.setText("Image Missing");
+            return imageLabel;
+        }
+
+        ImageIcon imageIcon = new ImageIcon(imagePath);
+        Image scaledImage = imageIcon.getImage().getScaledInstance(276, 136, Image.SCALE_SMOOTH);
+        imageLabel.setIcon(new ImageIcon(scaledImage));
+        return imageLabel;
     }
 
     private void displaySideBar() {
@@ -188,10 +249,27 @@ public class MainPage {
      * @param searchStr the string to match recipe names to (needle).
      */
     private List<Recipe> searchRecipe(List<Recipe> recipes, String searchStr) {
+        String normalizedQuery = searchStr == null ? "" : searchStr.trim().toLowerCase();
+        if (normalizedQuery.isEmpty()) {
+            return new ArrayList<>(recipes);
+        }
+
         List<Recipe> recipeList = new ArrayList<>();
 
         for (Recipe recipe : recipes) {
-            if (recipe.getName().toLowerCase().contains(searchStr.toLowerCase())) {
+            boolean matchesName = recipe.getName() != null && recipe.getName().toLowerCase().contains(normalizedQuery);
+            boolean matchesInstructions = recipe.getInstructions() != null
+                    && recipe.getInstructions().toLowerCase().contains(normalizedQuery);
+            boolean matchesIngredient = false;
+
+            for (String ingredient : recipe.getIngredients()) {
+                if (ingredient != null && ingredient.toLowerCase().contains(normalizedQuery)) {
+                    matchesIngredient = true;
+                    break;
+                }
+            }
+
+            if (matchesName || matchesInstructions || matchesIngredient) {
                 recipeList.add(recipe);
             }
         }
@@ -199,11 +277,12 @@ public class MainPage {
         return recipeList;
     }
 
-    private void onSearch() {
-        String searchQuery = searchField.getText();
-        List<Recipe> recipeList = searchRecipe(recipeManager.getRecipes(), searchQuery);
+    private List<Recipe> getFilteredRecipes() {
+        return searchRecipe(recipeManager.getRecipes(), searchField.getText());
+    }
 
-        displayRecipes(recipeList);
+    private void onSearch() {
+        displayRecipes(getFilteredRecipes());
     }
 
     public void openSettings() {

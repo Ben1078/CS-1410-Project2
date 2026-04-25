@@ -8,6 +8,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 
+/**
+ * Dialog window for managing settings.
+ * @author Benjamin Paul and Saulo Gomes
+ */
 public class Settings extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
@@ -19,6 +23,12 @@ public class Settings extends JDialog {
     private MainPage mainPage;
     private RecipeManager recipeManager;
 
+    /**
+     * Initializes a new settings dialog and manages components.
+     * @param parent the parent frame used to center the dialog and set size.
+     * @param mainPage the main page to trigger UI updates.
+     * @param recipeManager the manager used to reload recipes after changing settings.
+     */
     public Settings(Frame parent, MainPage mainPage, RecipeManager recipeManager) {
         super(parent, true);
 
@@ -82,6 +92,10 @@ public class Settings extends JDialog {
         setLocationRelativeTo(parent);
     }
 
+    /**
+     * Saves the modified settings, reloads the recipes via the {@code RecipeManager},
+     * refreshes the main display, and closes the dialog.
+     */
     private void onOK() {
         FileManager.setFilePath(recipeFilePathTextField.getText());
         recipeManager.loadRecipes();
@@ -89,6 +103,9 @@ public class Settings extends JDialog {
         dispose();
     }
 
+    /**
+     * Closes the dialog without applying any changes to the settings.
+     */
     private void onCancel() {
         dispose();
     }

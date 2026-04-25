@@ -13,6 +13,11 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for a dialog window that allows the user to add a recipe to the system.
+ * Allows users to add an image, a title for the recipe, ingredients, and directions.
+ * @author Saulo Gomes and Benjamin Paul
+ */
 public class AddRecipeDialog extends JDialog {
     private static final Path IMAGE_DIRECTORY = Path.of("resources", "images");
 
@@ -36,6 +41,12 @@ public class AddRecipeDialog extends JDialog {
     private MainPage mainPage;
     private Path selectedImageSource;
 
+    /**
+     * Constructor for AddRecipeDialog. Dynamically creates elements such as buttons, text fields, etc.
+     * @param parent the parent frame from which the dialog was opened from. Used primarily to center the dialog according to the parent frame.
+     * @param mainPage the main page of the app. Needed to update recipes once a new recipe is added.
+     * @param recipeManager a recipe manager to add new recipes to.
+     */
     public AddRecipeDialog(Frame parent, MainPage mainPage, RecipeManager recipeManager) {
         super(parent, "Add New Recipe", true);
         this.recipeManager = recipeManager;
@@ -84,6 +95,9 @@ public class AddRecipeDialog extends JDialog {
         setLocationRelativeTo(parent);
     }
 
+    /**
+     * Sets up dynamic elements, such as buttons, text fields, etc. once the dialog is opened.
+     */
     private void setup() {
         ingredientsPanel.setLayout(new BoxLayout(ingredientsPanel, BoxLayout.Y_AXIS));
         directionsTextField.setLineWrap(true);
@@ -96,6 +110,9 @@ public class AddRecipeDialog extends JDialog {
         });
     }
 
+    /**
+     * Creates a text field to input an ingredient and a delete button to allow users to remove the ingredient text field.
+     */
     private void addIngredient() {
         JTextField ingredientTextField = new JTextField();
         int index = ingredientsList.size();
@@ -132,6 +149,11 @@ public class AddRecipeDialog extends JDialog {
         refreshIngredientLayout();
     }
 
+    /**
+     * Removes both the text field and delete buttons and adjusts the layout of existing ingredient inputs.
+     * @param ingredientTextField the text field to remove.
+     * @param button the 'delete' button to remove.
+     */
     private void removeIngredient(JTextField ingredientTextField, JButton button) {
         int index = ingredientsList.indexOf(ingredientTextField);
         if (index >= 0) {
@@ -143,6 +165,9 @@ public class AddRecipeDialog extends JDialog {
         updateIngredients();
     }
 
+    /**
+     * Adjusts the position of existing ingredient inputs.
+     */
     private void updateIngredients() {
         ingredientsPanel.removeAll();
         ingredientRows.clear();
@@ -180,6 +205,10 @@ public class AddRecipeDialog extends JDialog {
         contentPane.repaint();
     }
 
+    /**
+     * Reads all ingredient inputs from text fields and compiles them into a list of string ingredients.
+     * @return the list of ingredients.
+     */
     private List<String> getIngredients() {
         List<String> ingredients = new ArrayList<>();
 
@@ -190,6 +219,9 @@ public class AddRecipeDialog extends JDialog {
         return ingredients;
     }
 
+    /**
+     * Creates a {@code Recipe} from the dialog inputs, registers it with the {@code RecipeManager}, and closes the dialog.
+     */
     private void onOK() {
         String recipeName = recipeNameTextField.getText();
         List<String> ingredients = getIngredients();
@@ -203,10 +235,16 @@ public class AddRecipeDialog extends JDialog {
         dispose();
     }
 
+    /**
+     * Closes the dialog without creating a {@code Recipe}
+     */
     private void onCancel() {
         dispose();
     }
 
+    /**
+     * Creates a dialog for users to input an image file that is used to display the recipe's image.
+     */
     private void onSetImage() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Select Recipe Image");
@@ -223,6 +261,11 @@ public class AddRecipeDialog extends JDialog {
         selectedImageLabel.setText(selectedImageSource.getFileName().toString());
     }
 
+    /**
+     * Cleans up the filename to ensure it's valid, and adds a timestamp. In case there's an error, a GUI dialog is displayed to the user
+     * @param recipeName the name of the recipe that will be used to name the file.
+     * @return the path where the image was saved, or an empty string, if there was an error.
+     */
     private String copySelectedImage(String recipeName) {
         if (selectedImageSource == null) {
             return "";

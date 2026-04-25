@@ -12,6 +12,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Displays a specific recipe, including image, ingredients,
+ * and instructions. Contains edit and view-only modes.
+ * @author Benjamin Paul and Saulo Gomes
+ */
 public class ViewRecipe extends JDialog {
     private static final Color DIALOG_BACKGROUND = new Color(245, 247, 250);
     private static final Color SURFACE_BACKGROUND = Color.WHITE;
@@ -44,6 +49,13 @@ public class ViewRecipe extends JDialog {
     private Frame parent;
     private RecipeManager recipeManager;
 
+    /**
+     * Instantiates a new view dialog for a specific recipe.
+     * @param parent the parent frame for dialog centering.
+     * @param mainPage main page for updating the recipe display.
+     * @param recipe the recipe to be displayed.
+     * @param recipeManager the manager handling recipes.
+     */
     public ViewRecipe(Frame parent, MainPage mainPage, Recipe recipe, RecipeManager recipeManager) {
         super(parent, true);
         setContentPane(contentPane);
@@ -89,6 +101,10 @@ public class ViewRecipe extends JDialog {
         setLocationRelativeTo(parent != null ? parent : null);
     }
 
+    /**
+     * Sets the dialog dimensions based on the parent size.
+     * @param parent the parent frame used for reference.
+     */
     private void applyDialogSize(Frame parent) {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int referenceWidth = parent != null && parent.getWidth() > 0 ? parent.getWidth() : screenSize.width;
@@ -106,6 +122,10 @@ public class ViewRecipe extends JDialog {
         setSize(dialogSize);
     }
 
+    /**
+     * Creates and styles a new text field for an ingredient input.
+     * @param ingredient the ingredient to set in the new field.
+     */
     private void addIngredientTextField(String ingredient) {
         JTextField ingredientTextField = new JTextField(ingredient);
         ingredientTextField.setMinimumSize(new Dimension(320, 38));
@@ -121,10 +141,18 @@ public class ViewRecipe extends JDialog {
         updateIngredients();
     }
 
+    /**
+     * Adds an empty ingredient input.
+     */
     public void onAddIngredient() {
         addIngredientTextField("");
     }
 
+    /**
+     * Removes an ingredient field input and the delete button of that ingredient.
+     * @param ingredientTextField the field to be removed.
+     * @param removeIngredientButton the button to be removed.
+     */
     public void onRemoveIngredient(JTextField ingredientTextField, JButton removeIngredientButton) {
         ingredientsPanel.remove(ingredientTextField);
         ingredientsPanel.remove(removeIngredientButton);
@@ -133,6 +161,9 @@ public class ViewRecipe extends JDialog {
         updateIngredients();
     }
 
+    /**
+     * Refreshes the ingredient list so that ingredients aren't added on top of each other.
+     */
     public void updateIngredients() {
         ingredientsPanel.removeAll();
 
@@ -169,6 +200,10 @@ public class ViewRecipe extends JDialog {
         refreshDialogLayout();
     }
 
+    /**
+     * Displays elements given a recipe, such as its name, ingredients, etc.
+     * @param recipe the recipe to display.
+     */
     private void displayRecipe(Recipe recipe) {
         recipeTitleLabel.setText(recipe.getName());
         recipeTitleTextField.setText(recipe.getName());
@@ -185,6 +220,10 @@ public class ViewRecipe extends JDialog {
         instructionsTextArea.setText(recipe.getInstructions());
     }
 
+    /**
+     * Loads the recipe image.
+     * @param imagePath the path to the recipe.
+     */
     private void updateRecipeImage(String imagePath) {
         if (imagePath == null || imagePath.isBlank()) {
             imagePlaceholderLabel.setText("No Recipe Image");
@@ -208,6 +247,9 @@ public class ViewRecipe extends JDialog {
         imagePlaceholderLabel.setIcon(new ImageIcon(scaledImage));
     }
 
+    /**
+     * Styles the page with colors, borders, and fonts.
+     */
     private void applyStyling() {
         Border sectionPadding = BorderFactory.createEmptyBorder(12, 14, 12, 14);
 
@@ -265,11 +307,21 @@ public class ViewRecipe extends JDialog {
         styleActionButton(deleteRecipeButton, DANGER, Color.WHITE);
     }
 
+    /**
+     * Styles a label with a font and a background.
+     * @param label the label to style.
+     */
     private void styleSectionLabel(JLabel label) {
         label.setFont(new Font("SansSerif", Font.BOLD, 16));
         label.setForeground(HEADING_TEXT);
     }
 
+    /**
+     * Styles a button with background and foreground colors.
+     * @param button the button component to style.
+     * @param background the color of the button surface.
+     * @param foreground the color of the button text.
+     */
     private void styleActionButton(JButton button, Color background, Color foreground) {
         button.setFont(new Font("SansSerif", Font.BOLD, 14));
         button.setBackground(background);
@@ -279,6 +331,9 @@ public class ViewRecipe extends JDialog {
         button.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
     }
 
+    /**
+     * Toggles between edit mode and view-only mode.
+     */
     private void toggleEditing() {
         if (isEditing) {
             backButton.setText("BACK");
@@ -312,6 +367,9 @@ public class ViewRecipe extends JDialog {
         refreshDialogLayout();
     }
 
+    /**
+     * Revalidates and repaints the dialog containers when the layout changes.
+     */
     private void refreshDialogLayout() {
         ingredientsPanel.revalidate();
         ingredientsPanel.repaint();
@@ -319,10 +377,16 @@ public class ViewRecipe extends JDialog {
         contentPane.repaint();
     }
 
+    /**
+     * Closes the dialog window.
+     */
     private void onBack() {
         dispose();
     }
 
+    /**
+     * Allows the user to edit the recipe.
+     */
     private void onEdit() {
         toggleEditing();
         for (String ingredient : recipe.getIngredients()) {
@@ -330,6 +394,9 @@ public class ViewRecipe extends JDialog {
         }
     }
 
+    /**
+     * Switches back to view-only mode.
+     */
     private void onCancel() {
         ingredientsPanel.removeAll();
         ingredientsList.clear();
@@ -337,6 +404,9 @@ public class ViewRecipe extends JDialog {
         displayRecipe(recipe);
     }
 
+    /**
+     * Saves the recipe, updates the manager, and refreshes the display.
+     */
     public void onConfirm() {
         toggleEditing();
 
@@ -359,6 +429,9 @@ public class ViewRecipe extends JDialog {
         mainPage.displayRecipes();
     }
 
+    /**
+     * Displays a confirmation dialog and deletes the recipe if the user confirms.
+     */
     public void onDeleteRecipe() {
         int result = JOptionPane.showConfirmDialog(
                 parent,

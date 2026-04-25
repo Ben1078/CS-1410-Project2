@@ -7,6 +7,11 @@ package recipeManager;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Represents a recipe, containing a name, a list of ingredients,
+ * preparation instructions, and an image.
+ * @author Benjamin Paul
+ */
 public class Recipe implements Serializable {
     private String name;
     private ArrayList<String> ingredients;

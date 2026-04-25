@@ -14,6 +14,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages the main user interface, including sidebar navigation,
+ * recipe search functionality, and the dynamic display of recipe cards.
+ * @author Saulo Gomes and Benjamin Paul
+ */
 public class MainPage {
     private static final Color SIDEBAR_BACKGROUND = new Color(34, 45, 62);
     private static final Color SEARCH_PANEL_BACKGROUND = new Color(44, 58, 80);
@@ -43,15 +48,27 @@ public class MainPage {
 
     private RecipeManager recipeManager;
 
+    /**
+     * Initializes a new instance of the main page view.
+     * @param mainFrame the main window used to host the page and center dialogs.
+     * @param recipeManager the manager handling recipes.
+     */
     public MainPage(Frame mainFrame, RecipeManager recipeManager) {
         this.mainFrame = mainFrame;
         this.recipeManager = recipeManager;
     }
 
+    /**
+     * Refreshes the UI to display all currently stored recipes from the {@code RecipeManager}.
+     */
     public void displayRecipes() {
         displayRecipes(getFilteredRecipes());
     }
 
+    /**
+     * Creates clickable recipe cards based on a provided list of recipes.
+     * @param recipes the list of {@code Recipe} objects to render in the display area.
+     */
     public void displayRecipes(List<Recipe> recipes) {
         recipeDisplay.removeAll();
         recipeDisplay.setLayout(new FlowLayout(FlowLayout.LEFT, 24, 12));
@@ -134,6 +151,9 @@ public class MainPage {
         return imageLabel;
     }
 
+    /**
+     * Initializes and organizes the sidebar layout.
+     */
     private void displaySideBar() {
         configureSidebarLayout();
         bindSidebarActions();
@@ -142,6 +162,9 @@ public class MainPage {
         sidebar.repaint();
     }
 
+    /**
+     * Attaches action listeners to sidebar components.
+     */
     private void bindSidebarActions() {
         if (sidebarActionsBound) {
             return;
@@ -157,6 +180,9 @@ public class MainPage {
         sidebarActionsBound = true;
     }
 
+    /**
+     * Styles the sidebar components by applying colors, fonts, and borders.
+     */
     private void applySidebarTheme() {
         Font buttonFont = new Font("SansSerif", Font.BOLD, 16);
         Dimension buttonSize = new Dimension(150, 42);
@@ -185,6 +211,13 @@ public class MainPage {
         styleButton(settingsButton, buttonFont, buttonSize, BUTTON_PRIMARY);
     }
 
+    /**
+     * Styles buttons with borders, fonts, and colors.
+     * @param button the button to style.
+     * @param font the font to apply.
+     * @param size the preferred dimensions.
+     * @param background the background color.
+     */
     private void styleButton(JButton button, Font font, Dimension size, Color background) {
         button.setFont(font);
         button.setPreferredSize(size);
@@ -195,6 +228,9 @@ public class MainPage {
         button.setOpaque(true);
     }
 
+    /**
+     * Sets sidebar layout and order.
+     */
     private void configureSidebarLayout() {
         sidebar.setLayout(new BorderLayout());
         installSidebarResizeHandler();
@@ -208,6 +244,9 @@ public class MainPage {
         sidebar.add(rightSidebarSpacer, BorderLayout.EAST);
     }
 
+    /**
+     * Adds listener to resize component during window resize events.
+     */
     private void installSidebarResizeHandler() {
         if (sidebarLayoutBound) {
             return;
@@ -223,6 +262,9 @@ public class MainPage {
         sidebarLayoutBound = true;
     }
 
+    /**
+     * Updates the preferred sizes of sidebar sections based on the width.
+     */
     private void updateSidebarPreferredSizes() {
         int sidebarWidth = Math.max(sidebar.getWidth(), main.getWidth());
         int searchWidth = Math.max(220, (int) Math.round(sidebarWidth * 0.30));
@@ -238,6 +280,9 @@ public class MainPage {
         rightSidebarSpacer.setMinimumSize(new Dimension(rightSpacerWidth, sidebarHeight));
     }
 
+    /**
+     * Displays sidebar and the recipe grid.
+     */
     public void display() {
         displaySideBar();
         displayRecipes();
@@ -277,19 +322,33 @@ public class MainPage {
         return recipeList;
     }
 
+    /**
+     * Returns the filtered recipes from the search text field input.
+     * @return the filtered recipes.
+     */
     private List<Recipe> getFilteredRecipes() {
         return searchRecipe(recipeManager.getRecipes(), searchField.getText());
     }
 
+    /**
+     * Handles search input and updates the display with filtered results.
+     */
     private void onSearch() {
         displayRecipes(getFilteredRecipes());
     }
 
+    /**
+     * Opens a dialog window for settings.
+     */
     public void openSettings() {
         JDialog settingsDialog = new Settings(this.mainFrame, this, recipeManager);
         settingsDialog.setVisible(true);
     }
 
+    /**
+     * Provides access to the main content container panel.
+     * @return the {@code JPanel} containing the GUI elements.
+     */
     public JPanel getContentPanel() {
         return this.main;
     }
